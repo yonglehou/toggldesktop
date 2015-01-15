@@ -81,6 +81,11 @@ class RelatedData {
         std::map<Poco::UInt64, std::string> *ws_names,
         std::vector<AutocompleteItem> *list);
 
+    void clientAutocompleteItems(
+        std::set<std::string> *unique_names,
+        std::map<Poco::UInt64, std::string> *ws_names,
+        std::vector<AutocompleteItem> *list);
+
     void workspaceAutocompleteItems(
         std::set<std::string> *unique_names,
         std::map<Poco::UInt64, std::string> *ws_names,

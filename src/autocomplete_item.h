@@ -14,6 +14,7 @@ namespace toggl {
 #define kAutocompleteItemTask 1
 #define kAutocompleteItemProject 2
 #define kAutocompleteItemWorkspace 3
+#define kAutocompleteItemClient 4
 
 class AutocompleteItem {
  public:
@@ -42,6 +43,9 @@ class AutocompleteItem {
     }
     bool IsWorkspace() const {
         return kAutocompleteItemWorkspace == Type;
+    }
+    bool IsClient() const {
+        return kAutocompleteItemClient == Type;
     }
 
     std::string String() const {

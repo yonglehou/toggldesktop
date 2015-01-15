@@ -33,8 +33,7 @@ class Formatter {
 
     static std::string JoinTaskName(
         Task * const,
-        Project * const,
-        Client * const);
+        Project * const);
 
     static std::string JoinTaskNameReverse(
         Task * const,

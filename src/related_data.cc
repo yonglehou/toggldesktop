@@ -99,7 +99,7 @@ void RelatedData::timeEntryAutocompleteItems(
 }
 
 // Add tasks, in format:
-// Task. Project. Client
+// Task. Project.
 void RelatedData::taskAutocompleteItems(
     std::set<std::string> *unique_names,
     std::map<Poco::UInt64, std::string> *ws_names,
@@ -169,8 +169,44 @@ void RelatedData::taskAutocompleteItems(
     }
 }
 
+// Add clients, in format:
+// Client
+void RelatedData::clientAutocompleteItems(
+    std::set<std::string> *unique_names,
+    std::map<Poco::UInt64, std::string> *ws_names,
+    std::vector<AutocompleteItem> *list) {
+
+    poco_check_ptr(list);
+
+    for (std::vector<Client *>::const_iterator it =
+        Clients.begin();
+            it != Clients.end(); it++) {
+        Client *c = *it;
+
+        std::string text = c->Name();
+        if (text.empty()) {
+            continue;
+        }
+
+        if (unique_names->find(text) != unique_names->end()) {
+            continue;
+        }
+        unique_names->insert(text);
+
+        AutocompleteItem autocomplete_item;
+        autocomplete_item.Text = text;
+        autocomplete_item.ProjectAndTaskLabel = text;
+        autocomplete_item.ClientLabel = text;
+        if (ws_names) {
+            autocomplete_item.WorkspaceName = (*ws_names)[c->WID()];
+        }
+        autocomplete_item.Type = kAutocompleteItemClient;
+        list->push_back(autocomplete_item);
+    }
+}
+
 // Add projects, in format:
-// Project. Client
+// Project
 void RelatedData::projectAutocompleteItems(
     std::set<std::string> *unique_names,
     std::map<Poco::UInt64, std::string> *ws_names,
@@ -192,7 +228,7 @@ void RelatedData::projectAutocompleteItems(
             c = ClientByID(p->CID());
         }
 
-        std::string text = Formatter::JoinTaskName(0, p, c);
+        std::string text = Formatter::JoinTaskName(0, p);
         if (text.empty()) {
             continue;
         }
@@ -236,6 +272,7 @@ std::vector<AutocompleteItem> RelatedData::MinitimerAutocompleteItems() {
     timeEntryAutocompleteItems(&unique_names, &result);
     taskAutocompleteItems(&unique_names, 0, &result);
     projectAutocompleteItems(&unique_names, 0, &result);
+    clientAutocompleteItems(&unique_names, 0, &result);
     std::sort(result.begin(), result.end(), CompareAutocompleteItems);
     return result;
 }
@@ -245,6 +282,7 @@ std::vector<AutocompleteItem> RelatedData::ProjectAutocompleteItems() {
     std::set<std::string> unique_names;
     std::map<Poco::UInt64, std::string> ws_names;
     workspaceAutocompleteItems(&unique_names, &ws_names, &result);
+    clientAutocompleteItems(&unique_names, &ws_names, &result);
     projectAutocompleteItems(&unique_names, &ws_names, &result);
     taskAutocompleteItems(&unique_names, &ws_names, &result);
     std::sort(result.begin(), result.end(), CompareStructuredAutocompleteItems);
@@ -351,7 +389,7 @@ void RelatedData::ProjectLabelAndColorCode(
         c = ClientByID(p->CID());
     }
 
-    *project_and_task_label = Formatter::JoinTaskName(t, p, c);
+    *project_and_task_label = Formatter::JoinTaskName(t, p);
 
     if (p) {
         *color_code = p->ColorCode();

@@ -44,26 +44,16 @@ std::string Formatter::togglTimeOfDayToPocoFormat(
 
 std::string Formatter::JoinTaskName(
     Task * const t,
-    Project * const p,
-    Client * const c) {
+    Project * const p) {
     std::stringstream ss;
-    bool empty = true;
     if (t) {
         ss << t->Name();
-        empty = false;
     }
     if (p) {
-        if (!empty) {
+        if (t) {
             ss << ". ";
         }
         ss << p->Name();
-        empty = false;
-    }
-    if (c) {
-        if (!empty) {
-            ss << ". ";
-        }
-        ss << c->Name();
     }
     return ss.str();
 }
@@ -634,17 +624,30 @@ bool CompareStructuredAutocompleteItems(
     AutocompleteItem a,
     AutocompleteItem b) {
 
-    if (a.WorkspaceName == b.WorkspaceName) {
-        if (a.IsWorkspace() && !b.IsWorkspace()) {
-            return true;
-        }
-        if (!a.IsWorkspace() && b.IsWorkspace()) {
-            return false;
-        }
-        return (Poco::UTF8::icompare(a.Text, b.Text) < 0);
+    if (a.WorkspaceName != b.WorkspaceName) {
+        return (Poco::UTF8::icompare(a.WorkspaceName, b.WorkspaceName) < 0);
     }
 
-    return (Poco::UTF8::icompare(a.WorkspaceName, b.WorkspaceName) < 0);
+    if (a.IsWorkspace() && !b.IsWorkspace()) {
+        return true;
+    }
+    if (!a.IsWorkspace() && b.IsWorkspace()) {
+        return false;
+    }
+
+    if (a.ClientLabel != b.ClientLabel) {
+        return (Poco::UTF8::icompare(a.ClientLabel, b.ClientLabel) < 0);
+    }
+
+    if (a.IsClient() && !b.IsClient()) {
+        return true;
+    }
+
+    if (!a.IsClient() && b.IsClient()) {
+        return false;
+    }
+
+    return (Poco::UTF8::icompare(a.Text, b.Text) < 0);
 }
 
 }   // namespace toggl
