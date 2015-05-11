@@ -238,14 +238,8 @@ namespace TogglDesktop
             idleNotificationWindowController = new IdleNotificationWindowController();
 
             initEditForm();
-            timeEntryListViewController.setEditPopup(editForm);
 
-            FlowLayoutPanel listing = timeEntryListViewController.getListing();
-            if (listing != null)
-            {
-                listing.Scroll += MainWindowControllerEntries_Scroll;
-                listing.MouseWheel += MainWindowControllerEntries_Scroll;
-            }
+            timeEntryListViewController.setEditPopup(editForm);
 
             if (!Toggl.StartUI(TogglDesktop.Program.Version()))
             {
@@ -956,7 +950,7 @@ namespace TogglDesktop
 
         private void hideHorizontalScrollBar()
         {
-            ShowScrollBar(timeEntryListViewController.getListing().Handle, SB_HORZ, false);
+            // FIXME: ShowScrollBar(timeEntryListViewController.getListing().Handle, SB_HORZ, false);
         }
 
         private void resizeHandle_MouseDown(object sender, MouseEventArgs e)

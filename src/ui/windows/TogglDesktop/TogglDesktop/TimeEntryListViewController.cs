@@ -22,10 +22,6 @@ namespace TogglDesktop
 
             Dock = DockStyle.Fill;
 
-            entries.AutoScroll = false;
-            entries.HorizontalScroll.Enabled = false;
-            entries.AutoScroll = true;
-
             Toggl.OnTimeEntryList += OnTimeEntryList;
             Toggl.OnLogin += OnLogin;
 
@@ -77,6 +73,8 @@ namespace TogglDesktop
         private void renderTimeEntryList(List<Toggl.TimeEntry> list)
         {
             emptyLabel.Visible = (list.Count == 0);
+
+            /* FIXME: move actual rendering into wpf user control
             entries.SuspendLayout();
 
             // Hide entry list for initial loading to avoid crazy flicker
@@ -121,6 +119,7 @@ namespace TogglDesktop
 
             entries.ResumeLayout();
             entries.PerformLayout();
+            */
 
             if (!entries.Visible)
             {
@@ -168,11 +167,6 @@ namespace TogglDesktop
         private void emptyLabel_Click(object sender, EventArgs e)
         {
             Toggl.OpenInBrowser();
-        }
-
-        internal FlowLayoutPanel getListing()
-        {
-            return entries;
         }
 
         internal Control findControlByGUID(string GUID)
