@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Text;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace TogglDesktop
@@ -1290,7 +1291,12 @@ namespace TogglDesktop
 
             ctx = toggl_context_init("windows_native_app", version);
 
-			toggl_set_environment(ctx, "production");
+            if (Application.ExecutablePath.Contains("bin\\Debug")
+            || Application.ExecutablePath.Contains("bin\\Release")) {
+                toggl_set_environment(ctx, "development");
+            } else {
+                toggl_set_environment(ctx, "production");
+            }
 
             string cacert_path = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
