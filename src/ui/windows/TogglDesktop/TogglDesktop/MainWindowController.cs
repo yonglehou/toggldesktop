@@ -187,11 +187,6 @@ namespace TogglDesktop
             }, null);
         }
 
-        private void MainWindowControllerEntries_Scroll(object sender, EventArgs e)
-        {
-            // FIXME: recalculatePopupPosition();
-        }
-
         void OnRunningTimerState(Toggl.TimeEntry te)
         {
             if (InvokeRequired)
@@ -655,11 +650,6 @@ namespace TogglDesktop
             }
         }
 
-        private void hideHorizontalScrollBar()
-        {
-            // FIXME: ShowScrollBar(timeEntryListViewController.getListing().Handle, SB_HORZ, false);
-        }
-
         private void resizeHandle_MouseDown(object sender, MouseEventArgs e)
         {
             isResizing = true;
@@ -671,7 +661,6 @@ namespace TogglDesktop
             {
                 isResizing = (e.Button == MouseButtons.Left);
 
-                // FIXME: what is happening here?
                 Win32helper.DoSomething(Handle, isResizing);
             }
         }
