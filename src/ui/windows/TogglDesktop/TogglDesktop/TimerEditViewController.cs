@@ -107,7 +107,9 @@ namespace TogglDesktop
             if (buttonStart.Text != "Start")
             {
                 Toggl.Stop();
-                if(editForm.Visible) {
+                
+                if(editForm != null && editForm.Visible)
+                {
                     editForm.ClosePopup();
                 }
                 return;

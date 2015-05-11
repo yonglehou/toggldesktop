@@ -167,11 +167,13 @@
     <Compile Include="IdleNotificationWindowController.Designer.cs">
       <DependentUpon>IdleNotificationWindowController.cs</DependentUpon>
     </Compile>
+    <Compile Include="KeyboardHooksController.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="StatusIconController.cs" />
     <Compile Include="TimeEntryCellControl.xaml.cs">
       <DependentUpon>TimeEntryCellControl.xaml</DependentUpon>
     </Compile>
@@ -221,6 +223,7 @@
     </Compile>
     <Compile Include="Utils.cs" />
     <Compile Include="win32.cs" />
+    <Compile Include="Win32helpers.cs" />
     <EmbeddedResource Include="AboutWindowController.resx">
       <DependentUpon>AboutWindowController.cs</DependentUpon>
     </EmbeddedResource>

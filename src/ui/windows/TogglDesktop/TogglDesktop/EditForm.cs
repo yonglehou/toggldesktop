@@ -165,11 +165,6 @@ namespace TogglDesktop
             editView.resetForms();
         }
 
-        internal void setWindowPos(int HWND_TOPMOST)
-        {
-            SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-        }
-
         internal void ClosePopup()
         {
             editView.buttonDone_Click(null, null);

@@ -13,7 +13,10 @@ namespace TogglDesktop
 {
     public partial class TimeEntryListViewController : UserControl
     {
+        // Will use for rendering mutex
         private Object rendering = new Object();
+
+        // FIXME: delete
         public TimeEntryCell currentEntry = null;
 
         public TimeEntryListViewController()
@@ -33,13 +36,8 @@ namespace TogglDesktop
         {
             if (!timerEditViewController.isAutocompleteOpened())
             {
-                entries.Focus();
+                elementHost.Focus();
             }
-        }
-
-        public int EntriesTop
-        {
-            get { return entries.Location.Y; }
         }
 
         public void SetAcceptButton(Form frm)
@@ -120,15 +118,6 @@ namespace TogglDesktop
             entries.ResumeLayout();
             entries.PerformLayout();
             */
-
-            if (!entries.Visible)
-            {
-                entries.Visible = true;
-            }
-        }
-
-        private void TimeEntryListViewController_Load(object sender, EventArgs e)
-        {
         }
 
         void OnLogin(bool open, UInt64 user_id)
@@ -140,53 +129,21 @@ namespace TogglDesktop
             }
             if (open || user_id == 0)
             {
-                entries.SuspendLayout();
-                entries.Controls.Clear();
-                entries.ResumeLayout();
-                entries.PerformLayout();
-            }
-        }
-
-        private void entries_ClientSizeChanged(object sender, EventArgs e)
-        {
-            if (entries.Controls.Count > 0)
-            {
-                entries.SuspendLayout();
-                entries.Controls[0].Width = entries.ClientSize.Width;
-                entries.ResumeLayout();
+                elementHost.Controls.Clear();
             }
         }
 
         private void entries_MouseEnter(object sender, EventArgs e)
         {
-            if (!timerEditViewController.focusList()) {
-                entries.Focus();
+            if (!timerEditViewController.focusList())
+            {
+                elementHost.Focus();
             }
         }
 
         private void emptyLabel_Click(object sender, EventArgs e)
         {
             Toggl.OpenInBrowser();
-        }
-
-        internal Control findControlByGUID(string GUID)
-        {
-            if (timerEditViewController.durationFocused)
-            {
-                for (int i = 0; i < entries.Controls.Count; i++)
-                {
-                    if ((entries.Controls[i] as TimeEntryCell).GUID == GUID)
-                    {
-                        return entries.Controls[i];
-                    }
-                }
-            }
-            return null;
-        }
-
-        internal void setEditPopup(EditForm editForm)
-        {
-            timerEditViewController.editForm = editForm;
         }
     }
 }

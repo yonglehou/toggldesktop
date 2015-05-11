@@ -31,7 +31,8 @@
             this.panelHeader = new System.Windows.Forms.Panel();
             this.timerEditViewController = new TogglDesktop.TimerEditViewController();
             this.emptyLabel = new System.Windows.Forms.Label();
-            this.entries = new System.Windows.Forms.Integration.ElementHost();
+            this.elementHost = new System.Windows.Forms.Integration.ElementHost();
+            this.timeEntryListControl1 = new TogglDesktop.TimeEntryListControl();
             this.panelHeader.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -77,26 +78,25 @@
             this.emptyLabel.Visible = false;
             this.emptyLabel.Click += new System.EventHandler(this.emptyLabel_Click);
             // 
-            // entries
+            // elementHost
             // 
-            this.entries.Location = new System.Drawing.Point(0, 174);
-            this.entries.Name = "entries";
-            this.entries.Size = new System.Drawing.Size(314, 174);
-            this.entries.TabIndex = 3;
-            this.entries.Child = null;
+            this.elementHost.Location = new System.Drawing.Point(0, 173);
+            this.elementHost.Name = "elementHost";
+            this.elementHost.Size = new System.Drawing.Size(314, 175);
+            this.elementHost.TabIndex = 4;
+            this.elementHost.Child = this.timeEntryListControl1;
             // 
             // TimeEntryListViewController
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.Controls.Add(this.entries);
+            this.Controls.Add(this.elementHost);
             this.Controls.Add(this.emptyLabel);
             this.Controls.Add(this.panelHeader);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "TimeEntryListViewController";
             this.Size = new System.Drawing.Size(314, 351);
-            this.Load += new System.EventHandler(this.TimeEntryListViewController_Load);
             this.panelHeader.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -107,6 +107,7 @@
         private System.Windows.Forms.Panel panelHeader;
         private TimerEditViewController timerEditViewController;
         private System.Windows.Forms.Label emptyLabel;
-        private System.Windows.Forms.Integration.ElementHost entries;
+        private System.Windows.Forms.Integration.ElementHost elementHost;
+        private TimeEntryListControl timeEntryListControl1;
     }
 }
