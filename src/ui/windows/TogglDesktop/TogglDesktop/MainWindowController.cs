@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.Integration;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -26,7 +27,8 @@ namespace TogglDesktop
         private List<Icon> statusIcons = new List<Icon>();
 
         private LoginViewController loginViewController;
-        private TimeEntryListViewController timeEntryListViewController;
+        private TimeEntryListControl timeEntryListControl;
+        private ElementHost timeEntryListHost;
         private TimeEntryEditViewController timeEntryEditViewController;
         private AboutWindowController aboutWindowController;
         private PreferencesWindowController preferencesWindowController;
@@ -167,7 +169,6 @@ namespace TogglDesktop
 
         protected override void OnShown(EventArgs e)
         {
-            hideHorizontalScrollBar();
             base.OnShown(e);
         }
 
@@ -230,7 +231,14 @@ namespace TogglDesktop
             Toggl.OnIdleNotification += OnIdleNotification;
 
             loginViewController = new LoginViewController();
-            timeEntryListViewController = new TimeEntryListViewController();
+
+            timeEntryListControl = new TimeEntryListControl();
+            timeEntryListControl.InitializeComponent();
+
+            timeEntryListHost = new ElementHost();
+            timeEntryListHost.Dock = DockStyle.Fill;
+            timeEntryListHost.Child = timeEntryListControl;
+
             timeEntryEditViewController = new TimeEntryEditViewController();
             aboutWindowController = new AboutWindowController();
             preferencesWindowController = new PreferencesWindowController();
@@ -238,14 +246,6 @@ namespace TogglDesktop
             idleNotificationWindowController = new IdleNotificationWindowController();
 
             initEditForm();
-            timeEntryListViewController.setEditPopup(editForm);
-
-            FlowLayoutPanel listing = timeEntryListViewController.getListing();
-            if (listing != null)
-            {
-                listing.Scroll += MainWindowControllerEntries_Scroll;
-                listing.MouseWheel += MainWindowControllerEntries_Scroll;
-            }
 
             if (!Toggl.StartUI(TogglDesktop.Program.Version()))
             {
@@ -492,7 +492,7 @@ namespace TogglDesktop
                     editForm.Hide();
                     editForm.GUID = null;
                 }
-                contentPanel.Controls.Remove(timeEntryListViewController);
+                contentPanel.Controls.Remove(timeEntryListHost);
                 contentPanel.Controls.Remove(timeEntryEditViewController);
                 contentPanel.Controls.Add(loginViewController);
                 MinimumSize = new Size(loginViewController.MinimumSize.Width, loginViewController.MinimumSize.Height + 40);
@@ -532,52 +532,21 @@ namespace TogglDesktop
             if (open)
             {
                 troubleBox.Visible = false;
+                
                 contentPanel.Location = defaultContentPosition;
+                
                 contentPanel.Controls.Remove(loginViewController);
+                
                 MinimumSize = new Size(230, 86);
-                contentPanel.Controls.Add(timeEntryListViewController);
-                timeEntryListViewController.SetAcceptButton(this);
+
+                contentPanel.Controls.Add(timeEntryListHost);
+
                 if (editForm.Visible)
                 {
                     editForm.Hide();
                     editForm.GUID = null;
                 }
             }
-        }
-
-        public static Control FindControlAtPoint(Control container, Point pos)
-        {
-            if (null == container)
-            {
-                return null;
-            }
-
-            if (container.GetType() == typeof(TimeEntryCell) || container.GetType() == typeof(TimerEditViewController))
-            {
-                return container;
-            }
-
-            foreach (Control c in container.Controls)
-            {
-                if (c.Visible && c.Bounds.Contains(pos))
-                {
-                    Control child = FindControlAtPoint(c, new Point(pos.X - c.Left, pos.Y - c.Top));
-                    if (child != null && (child.GetType() == typeof(TimeEntryCell) || child.GetType() == typeof(TimerEditViewController)))
-                    {
-                        return child;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static Control FindControlAtCursor(Form form)
-        {
-            Point pos = Cursor.Position;
-            if (form.Bounds.Contains(pos))
-                return FindControlAtPoint(form, form.PointToClient(Cursor.Position));
-            return null;
         }
 
         private void initEditForm()
@@ -618,11 +587,8 @@ namespace TogglDesktop
 
         private Control getSelectedEntryByGUID(string GUID)
         {
-            Control c = timeEntryListViewController.findControlByGUID(GUID);
-            if ( c != null) {
-                return c;
-            }
-            return FindControlAtCursor(this);
+            // FIXME:
+            return null;
         }
 
         void OnTimeEntryEditor(
@@ -885,18 +851,6 @@ namespace TogglDesktop
                 }
             }
 
-            if (running)
-            {
-                arrowTop = timeEntryListViewController.EntriesTop / 2;
-            }
-            else
-            {
-                if (editableEntry.GetType() == typeof(TimeEntryCell))
-                {
-                    ctrlpt.Y += timeEntryListViewController.EntriesTop + (((TimeEntryCell)editableEntry).getTopLocation()) - (editForm.Height / 2);
-                    ((TimeEntryCell)editableEntry).opened = true;
-                }
-            }
             editForm.setPlacement(left, arrowTop, ctrlpt, s, this);
 
         }
@@ -920,15 +874,12 @@ namespace TogglDesktop
         private void MainWindowController_SizeChanged(object sender, EventArgs e)
         {
             recalculatePopupPosition();
-            if (timeEntryListViewController != null)
-            {
-                hideHorizontalScrollBar();
-            }
             resizeHandle.Location = new Point(Width-16, Height-56);
             updateResizeHandleBackground();
         }
 
-        private void updateResizeHandleBackground() {
+        private void updateResizeHandleBackground()
+        {
             if (contentPanel.Controls.Contains(loginViewController))
             {
                 resizeHandle.BackColor = Color.FromArgb(69, 69, 69);
@@ -946,17 +897,13 @@ namespace TogglDesktop
                 resizeHandle.BackColor = System.Drawing.Color.Transparent;
             }
         }
+
         private void recalculatePopupPosition()
         {
             if (editForm != null && editForm.Visible && editableEntry != null)
             {
                 setEditFormLocation(editableEntry.GetType() == typeof(TimerEditViewController));
             }
-        }
-
-        private void hideHorizontalScrollBar()
-        {
-            ShowScrollBar(timeEntryListViewController.getListing().Handle, SB_HORZ, false);
         }
 
         private void resizeHandle_MouseDown(object sender, MouseEventArgs e)
