@@ -16,9 +16,6 @@ namespace TogglDesktop
         // Will use for rendering mutex
         private Object rendering = new Object();
 
-        // FIXME: delete
-        public TimeEntryCell currentEntry = null;
-
         public TimeEntryListViewController()
         {
             InitializeComponent();
@@ -52,10 +49,7 @@ namespace TogglDesktop
                 Invoke((MethodInvoker)delegate { OnTimeEntryList(open, list); });
                 return;
             }
-            if (open && currentEntry != null)
-            {
-                currentEntry.opened = false;
-            }
+
             DateTime start = DateTime.Now;
 
             lock (rendering)

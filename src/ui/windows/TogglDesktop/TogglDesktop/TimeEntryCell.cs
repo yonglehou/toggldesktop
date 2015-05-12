@@ -141,23 +141,6 @@ namespace TogglDesktop
             Toggl.Edit(GUID, false, Toggl.Project);
         }
 
-        private void item_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (list.currentEntry != this)
-            {
-                if (list.currentEntry != null)
-                {
-                    if (list.currentEntry.opened)
-                    {
-                        return;
-                    }
-                    list.currentEntry.toggleBackground(defaultColor);
-                }
-                toggleBackground(hoverColor);
-                list.currentEntry = this;
-            }
-        }
-
         private void toggleBackground(Color color)
         {
             panel.BackColor = color;

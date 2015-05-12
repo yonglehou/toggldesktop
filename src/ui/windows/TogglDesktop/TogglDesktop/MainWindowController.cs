@@ -70,13 +70,6 @@ namespace TogglDesktop
             }
         }
 
-        protected override void OnShown(EventArgs e)
-        {
-            hideHorizontalScrollBar();
-
-            base.OnShown(e);
-        }
-
         public static void DisableTop()
         {
             instance.topDisabled = true;
@@ -384,7 +377,6 @@ namespace TogglDesktop
                 return;
             }
             editForm.reset();
-            setEditFormLocation(te.DurationInSeconds < 0);
             editForm.GUID = te.GUID;
             editForm.Show();
         }
@@ -593,38 +585,8 @@ namespace TogglDesktop
             Toggl.SetWake();
         }
 
-        private void MainWindowController_LocationChanged(object sender, EventArgs e)
-        {
-            // FIXME: recalculatePopupPosition();
-        }
-
-        private void setEditFormLocation(bool running)
-        {
-            if (Screen.AllScreens.Length > 1)
-            {
-                foreach (Screen s in Screen.AllScreens)
-                {
-                    if (s.WorkingArea.IntersectsWith(DesktopBounds))
-                    {
-                        // FIXME: calculateEditFormPosition(running, s);
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                // FIXME: calculateEditFormPosition(running,Screen.PrimaryScreen);
-            }
-        }
-
         private void MainWindowController_SizeChanged(object sender, EventArgs e)
         {
-            // FIXME: recalculatePopupPosition();
-
-            if (timeEntryListViewController != null)
-            {
-                hideHorizontalScrollBar();
-            }
             resizeHandle.Location = new Point(Width-16, Height-56);
 
             updateResizeHandleBackground();
