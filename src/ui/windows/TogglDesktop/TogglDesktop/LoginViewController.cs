@@ -6,6 +6,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Oauth2.v2;
 using Google.Apis.Services;
+using TogglDesktop.WPF;
 
 namespace TogglDesktop
 {
@@ -19,22 +20,20 @@ public partial class LoginViewController : UserControl
     }
 
     private ConfirmAction confirmAction = ConfirmAction.Unknown;
-    private LoginTextBox email;
-    private LoginPasswordBox password;
 
     public LoginViewController()
     {
         InitializeComponent();
 
-        email = (LoginTextBox)emailBoxHost.Child;
         email.EmptyText = "Your email address";
-
-        password = (LoginPasswordBox)passwordBoxHost.Child;
         password.EmptyText = "Password";
+
+        confirmButton.Click += (o, e) => confirm();
+        email.KeyUp += textFieldKeyUp;
+        password.KeyUp += textFieldKeyUp;
 
         setConfirmAction(ConfirmAction.LogIn);
 
-        TogglForm.ApplyFont("roboto", confirmButton);
         TogglForm.ApplyFont("roboto", googleLoginTextField);
         TogglForm.ApplyFont("roboto", passwordForgotTextField);
         TogglForm.ApplyFont("roboto", loginSignupToggleLabel);
@@ -45,10 +44,22 @@ public partial class LoginViewController : UserControl
         centerControl(loginSignupToggle);
     }
 
+    private void textFieldKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter)
+        {
+            confirm();
+            e.Handled = true;
+        }
+    }
+
     public void SetAcceptButton(Form frm)
     {
-        frm.AcceptButton = confirmButton;
+        // WPF buttons do not support this
+        // see textFieldKeyUp for manual implementation
+        frm.AcceptButton = null;
     }
+
 
     private bool validateFields()
     {
@@ -135,7 +146,7 @@ public partial class LoginViewController : UserControl
         }
     }
 
-    private void confirmButton_Click(object sender, EventArgs e)
+    private void confirm()
     {
         switch (confirmAction)
         {
@@ -205,6 +216,7 @@ public partial class LoginViewController : UserControl
         Toggl.Signup(email.Text, password.Text);
         password.Clear();
     }
+
 
 }
 }
