@@ -293,7 +293,8 @@ BOOL manualMode = NO;
 		if (NSUserNotificationActivationTypeActionButtonClicked == notification.activationType)
 		{
 			NSNumber *project_id = notification.userInfo[@"project_id"];
-			toggl_start(ctx, "", "", 0, project_id.longValue);
+			char_t *guid = toggl_start(ctx, "", "", 0, project_id.longValue, 0);
+			free(guid);
 		}
 		return;
 	}
@@ -336,7 +337,8 @@ BOOL manualMode = NO;
 							 [new_time_entry.Description UTF8String],
 							 [new_time_entry.duration UTF8String],
 							 new_time_entry.TaskID,
-							 new_time_entry.ProjectID);
+							 new_time_entry.ProjectID,
+							 0);
 	free(guid);
 }
 
