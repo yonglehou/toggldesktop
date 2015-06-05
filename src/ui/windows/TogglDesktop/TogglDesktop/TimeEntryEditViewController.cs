@@ -239,10 +239,7 @@ public partial class TimeEntryEditViewController : UserControl
             checkBoxBillable.Tag = null;
         }
 
-        if (!te.CanAddProjects)
-        {
-            linkAddProject.Visible = !te.CanAddProjects;
-        }
+        linkAddProject.Visible = (comboBoxWorkspace.Items.Count > 0);
 
         if (open)
         {
