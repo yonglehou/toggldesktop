@@ -358,7 +358,7 @@ public partial class TimeEntryEditViewController : UserControl
             return;
         }
 
-        ulong workspaceID = ComboBoxHelper.SelectedItemID(comboBoxWorkspace);
+        ulong workspaceID = ComboBoxHelper.SelectedWorkspaceItemID(comboBoxWorkspace);
 
         comboBoxClient.Items.Clear();
         foreach (Toggl.Model o in clients)
