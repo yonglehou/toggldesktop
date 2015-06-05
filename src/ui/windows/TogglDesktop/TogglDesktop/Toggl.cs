@@ -29,6 +29,29 @@ public static class Toggl
     // Models
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct Workspace
+    {
+        public UInt64 ID;
+        public UInt64 WID;
+        [MarshalAs(UnmanagedType.LPWStr)]
+        public string GUID;
+        [MarshalAs(UnmanagedType.LPWStr)]
+        public string Name;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool OnlyAdminsMayCreateProjects;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool Admin;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool Premium;
+        public IntPtr Next;
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct TimeEntry
     {
         public Int64 DurationInSeconds;
@@ -283,6 +306,9 @@ public static class Toggl
 
     public delegate void DisplayViewItems(
         List<Model> list);
+
+    public delegate void DisplayWorkspaceViewItems(
+    List<Workspace> list);
 
     [UnmanagedFunctionPointer(convention)]
     private delegate void TogglDisplayTimeEntryEditor(
@@ -1169,7 +1195,7 @@ public static class Toggl
     public static event DisplayAutocomplete OnMinitimerAutocomplete = delegate { };
     public static event DisplayAutocomplete OnProjectAutocomplete = delegate { };
     public static event DisplayTimeEntryEditor OnTimeEntryEditor = delegate { };
-    public static event DisplayViewItems OnWorkspaceSelect = delegate { };
+    public static event DisplayWorkspaceViewItems OnWorkspaceSelect = delegate { };
     public static event DisplayViewItems OnClientSelect = delegate { };
     public static event DisplayViewItems OnTags = delegate { };
     public static event DisplaySettings OnSettings = delegate { };
@@ -1258,7 +1284,7 @@ public static class Toggl
 
         toggl_on_workspace_select(ctx, delegate(IntPtr first)
         {
-            OnWorkspaceSelect(ConvertToViewItemList(first));
+            OnWorkspaceSelect(ConvertToWorkspaceList(first));
         });
 
         toggl_on_client_select(ctx, delegate(IntPtr first)
@@ -1499,6 +1525,29 @@ public static class Toggl
                 break;
             }
             n = (TimeEntry)Marshal.PtrToStructure(
+                n.Next, typeof(TimeEntry));
+        };
+        return list;
+    }
+
+    private static List<Workspace> ConvertToWorkspaceList(IntPtr first)
+    {
+        List<Workspace> list = new List<Workspace>();
+        if (IntPtr.Zero == first)
+        {
+            return list;
+        }
+        Workspace n = (Workspace)Marshal.PtrToStructure(
+            first, typeof(Workspace));
+
+        while (true)
+        {
+            list.Add(n);
+            if (n.Next == IntPtr.Zero)
+            {
+                break;
+            }
+            n = (Workspace)Marshal.PtrToStructure(
                 n.Next, typeof(TimeEntry));
         };
         return list;

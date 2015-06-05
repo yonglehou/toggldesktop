@@ -397,7 +397,7 @@ public partial class TimeEntryEditViewController : UserControl
         setCheckedTags(timeEntry);
     }
 
-    void OnWorkspaceSelect(List<Toggl.Model> list)
+    void OnWorkspaceSelect(List<Toggl.Workspace> list)
     {
         if (InvokeRequired)
         {
@@ -407,9 +407,12 @@ public partial class TimeEntryEditViewController : UserControl
             return;
         }
         comboBoxWorkspace.Items.Clear();
-        foreach (Toggl.Model o in list)
+        foreach (Toggl.Workspace o in list)
         {
-            comboBoxWorkspace.Items.Add(o);
+            if (o.Admin || !o.OnlyAdminsMayCreateProjects)
+            {
+                comboBoxWorkspace.Items.Add(o);
+            }
         }
     }
 
@@ -646,7 +649,7 @@ public partial class TimeEntryEditViewController : UserControl
         ulong workspaceID = timeEntry.WID;
         if (comboBoxWorkspace.Items.Count == 1)
         {
-            workspaceID = ((Toggl.Model)comboBoxWorkspace.Items[0]).ID;
+            workspaceID = ((Toggl.Workspace)comboBoxWorkspace.Items[0]).ID;
         }
         if (comboBoxWorkspace.Items.Count > 1)
         {
