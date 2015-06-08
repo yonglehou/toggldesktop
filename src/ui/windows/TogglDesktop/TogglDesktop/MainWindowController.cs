@@ -23,7 +23,6 @@ public partial class MainWindowController : TogglForm
     private IdleNotificationWindowController idleNotificationWindowController;
 
     private EditForm editForm;
-    private Control editableEntry;
 
     private bool isTracking = false;
     private Point defaultContentPosition =  new System.Drawing.Point(0, 0);
@@ -44,11 +43,9 @@ public partial class MainWindowController : TogglForm
 
         instance = this;
 
-        startHook.KeyPressed +=
-            new EventHandler<KeyPressedEventArgs>(hookStartKeyPressed);
+        startHook.KeyPressed += this.hookStartKeyPressed;
 
-        showHook.KeyPressed +=
-            new EventHandler<KeyPressedEventArgs>(hookShowKeyPressed);
+        showHook.KeyPressed += this.hookShowKeyPressed;
     }
 
     void setGlobalShortCutKeys()
@@ -57,7 +54,7 @@ public partial class MainWindowController : TogglForm
         {
             startHook.Clear();
             string startKey = Properties.Settings.Default.StartKey;
-            if (startKey != null && startKey != "")
+            if (!string.IsNullOrEmpty(startKey))
             {
                 startHook.RegisterHotKey(
                     Properties.Settings.Default.StartModifiers,
@@ -73,7 +70,7 @@ public partial class MainWindowController : TogglForm
         {
             showHook.Clear();
             string showKey = Properties.Settings.Default.ShowKey;
-            if (showKey != null && showKey != "")
+            if (!string.IsNullOrEmpty(showKey))
             {
                 showHook.RegisterHotKey(
                     Properties.Settings.Default.ShowModifiers,
@@ -119,15 +116,10 @@ public partial class MainWindowController : TogglForm
 
     public void toggleMenu()
     {
+        // this method is called from external code (magic?) to open the cogwheel-menu
         Point pt = new Point(Width - 80, 0);
         pt = PointToScreen(pt);
         trayIconMenu.Show(pt);
-    }
-
-    protected override void OnShown(EventArgs e)
-    {
-        hideHorizontalScrollBar();
-        base.OnShown(e);
     }
 
     public static void DisableTop()
@@ -200,13 +192,6 @@ public partial class MainWindowController : TogglForm
         timeEntryListViewController.setEditPopup(editForm);
         editForm.Owner = aboutWindowController.Owner = preferencesWindowController.Owner = feedbackWindowController.Owner = this;
 
-        FlowLayoutPanel listing = timeEntryListViewController.getListing();
-        if (listing != null)
-        {
-            listing.Scroll += MainWindowControllerEntries_Scroll;
-            listing.MouseWheel += MainWindowControllerEntries_Scroll;
-        }
-
         if (!Toggl.StartUI(TogglDesktop.Program.Version()))
         {
             try
@@ -272,7 +257,7 @@ public partial class MainWindowController : TogglForm
             string result = Toggl.RunScript(script, ref err);
             if (0 != err)
             {
-                Console.WriteLine(string.Format("Failed to run script, err = {0}", err));
+                Console.WriteLine("Failed to run script, err = {0}", err);
             }
             Console.WriteLine(result);
 
@@ -281,11 +266,6 @@ public partial class MainWindowController : TogglForm
                 TogglDesktop.Program.Shutdown(0);
             }
         }, null);
-    }
-
-    private void MainWindowControllerEntries_Scroll(object sender, EventArgs e)
-    {
-        recalculatePopupPosition();
     }
 
     void OnRunningTimerState(Toggl.TimeEntry te)
@@ -570,14 +550,6 @@ public partial class MainWindowController : TogglForm
         return null;
     }
 
-    public static Control FindControlAtCursor(Form form)
-    {
-        Point pos = Cursor.Position;
-        if (form.Bounds.Contains(pos))
-            return FindControlAtPoint(form, form.PointToClient(Cursor.Position));
-        return null;
-    }
-
     private void initEditForm()
     {
         editForm = new EditForm
@@ -592,35 +564,13 @@ public partial class MainWindowController : TogglForm
     public void PopupInput(Toggl.TimeEntry te)
     {
         if (te.GUID == editForm.GUID) {
-            if (editableEntry.GetType() == typeof(TimeEntryCell))
-            {
-                ((TimeEntryCell)editableEntry).opened = false;
-            }
             editForm.CloseButton_Click(null, null);
             return;
         }
-        if (editableEntry != null && editableEntry.GetType() == typeof(TimeEntryCell))
-        {
-            ((TimeEntryCell)editableEntry).opened = false;
-        }
         editForm.reset();
-        editableEntry = getSelectedEntryByGUID(te.GUID);
-        if (null == editableEntry)
-        {
-            return;
-        }
-        setEditFormLocation(te.DurationInSeconds < 0);
+        setEditFormLocation();
         editForm.GUID = te.GUID;
         editForm.Show();
-    }
-
-    private Control getSelectedEntryByGUID(string GUID)
-    {
-        Control c = timeEntryListViewController.findControlByGUID(GUID);
-        if ( c != null) {
-            return c;
-        }
-        return FindControlAtCursor(this);
     }
 
     void OnTimeEntryEditor(
@@ -661,10 +611,6 @@ public partial class MainWindowController : TogglForm
 
         if (editForm.Visible)
         {
-            if (editableEntry.GetType() == typeof(TimeEntryCell))
-            {
-                ((TimeEntryCell)editableEntry).opened = false;
-            }
             editForm.ClosePopup();
         }
     }
@@ -850,7 +796,7 @@ public partial class MainWindowController : TogglForm
         recalculatePopupPosition();
     }
 
-    private void setEditFormLocation(bool running)
+    private void setEditFormLocation()
     {
         if (Screen.AllScreens.Length > 1)
         {
@@ -858,54 +804,27 @@ public partial class MainWindowController : TogglForm
             {
                 if (s.WorkingArea.IntersectsWith(DesktopBounds))
                 {
-                    calculateEditFormPosition(running, s);
+                    calculateEditFormPosition(s);
                     break;
                 }
             }
         }
         else
         {
-            calculateEditFormPosition(running,Screen.PrimaryScreen);
+            calculateEditFormPosition(Screen.PrimaryScreen);
         }
     }
 
-    private void calculateEditFormPosition(bool running, Screen s)
+    private void calculateEditFormPosition(Screen s)
     {
-        Point ctrlpt = PointToScreen(editableEntry.Location);
-        int arrowTop = 0;
-        bool left = false;
-
-        if (Location.X < editForm.Width && (s.Bounds.Width - (Location.X + Width)) < editForm.Width)
+        Point editPopupLocation = new Point(Left, Top);
+        bool left = ((s.Bounds.Width - (Location.X + Width)) < editForm.Width);
+        if (!left)
         {
-            ctrlpt.X += (Width/2);
-        }
-        else
-        {
-            if ((editForm.Width + ctrlpt.X + Width) > (s.WorkingArea.Location.X + s.Bounds.Width))
-            {
-                ctrlpt.X -= editForm.Width;
-                left = true;
-            }
-            else
-            {
-                ctrlpt.X += Width;
-            }
+            editPopupLocation.X += Width;
         }
 
-        if (running)
-        {
-            arrowTop = timeEntryListViewController.EntriesTop / 2;
-        }
-        else
-        {
-            if (editableEntry.GetType() == typeof(TimeEntryCell))
-            {
-                ctrlpt.Y += timeEntryListViewController.EntriesTop + (((TimeEntryCell)editableEntry).getTopLocation()) - (editForm.Height / 2);
-                ((TimeEntryCell)editableEntry).opened = true;
-            }
-        }
-        editForm.setPlacement(left, arrowTop, ctrlpt, s, this);
-
+        editForm.setPlacement(left, editPopupLocation, Height);
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -914,10 +833,10 @@ public partial class MainWindowController : TogglForm
         {
             if (editForm.Visible)
             {
-                if (editableEntry.GetType() == typeof(TimeEntryCell))
-                {
-                    ((TimeEntryCell)editableEntry).opened = false;
-                }
+                //if (editableEntry.GetType() == typeof(TimeEntryCell))
+                //{
+                //    ((TimeEntryCell)editableEntry).opened = false;
+                //}
                 editForm.ClosePopup();
             }
         }
@@ -927,10 +846,6 @@ public partial class MainWindowController : TogglForm
     private void MainWindowController_SizeChanged(object sender, EventArgs e)
     {
         recalculatePopupPosition();
-        if (timeEntryListViewController != null)
-        {
-            hideHorizontalScrollBar();
-        }
         resizeHandle.Location = new Point(Width-16, Height-56);
         updateResizeHandleBackground();
     }
@@ -955,16 +870,12 @@ public partial class MainWindowController : TogglForm
     }
     private void recalculatePopupPosition()
     {
-        if (editForm != null && editForm.Visible && editableEntry != null)
+        if (editForm != null && editForm.Visible)
         {
-            setEditFormLocation(editableEntry.GetType() == typeof(TimerEditViewController));
+            setEditFormLocation();
         }
     }
 
-    private void hideHorizontalScrollBar()
-    {
-        Win32.ShowScrollBar(timeEntryListViewController.getListing().Handle, Win32.SB_HORZ, false);
-    }
 
     private void resizeHandle_MouseDown(object sender, MouseEventArgs e)
     {
