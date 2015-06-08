@@ -650,7 +650,7 @@ public partial class TimeEntryEditViewController : UserControl
         }
         if (comboBoxWorkspace.Items.Count > 1)
         {
-            workspaceID = ComboBoxHelper.SelectedItemID(comboBoxWorkspace);
+            workspaceID = ComboBoxHelper.SelectedWorkspaceItemID(comboBoxWorkspace);
         }
         if (workspaceID == 0)
         {
@@ -986,7 +986,7 @@ public partial class TimeEntryEditViewController : UserControl
         }
         if (comboBoxWorkspace.Items.Count > 1)
         {
-            workspaceID = ComboBoxHelper.SelectedItemID(comboBoxWorkspace);
+            workspaceID = ComboBoxHelper.SelectedWorkspaceItemID(comboBoxWorkspace);
         }
         if (0 == workspaceID)
         {
